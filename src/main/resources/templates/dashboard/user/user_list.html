@@ -1,0 +1,263 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+    <script type="text/javascript">
+
+        function createDiv(name, userId, address, mobile) {
+            // var url = "https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=Code%" + userId + "%0AAddress%" + address + "%0AMobile%" + mobile;
+            var url = "https://api.qrserver.com/v1/create-qr-code/?data=Code%" + userId + "%\nAddress%" + address + "%\nMobile%" + mobile + "%&amp;size=200x200"
+
+            console.log(url);
+            var encoded = encodeURI(url);
+            console.log("encoded url: " + encoded);
+
+            var x = document.createElement("IMG");
+            x.setAttribute("src", encoded);
+            x.setAttribute("width", "150px");
+            x.setAttribute("height", "150px");
+            x.setAttribute("alt", "Image");
+            x.setAttribute("paddingLeft", "5%");
+            x.setAttribute("paddingRight", "5%");
+            x.setAttribute("margin", "0 auto");
+            x.setAttribute("padding-top", "5%");
+
+            var span = document.createElement("span");
+            span.setAttribute("bottom", "0")
+            span.setAttribute("left", "1")
+            span.setAttribute("justifyContent", "center")
+            // span.setAttribute("textAlign", "center")
+            span.setAttribute("marginLeft", "1")
+            span.innerText = userId;
+
+            var boardDiv = document.createElement("div");
+            var br = document.createElement("br");
+
+            boardDiv.className = "new-div";
+            boardDiv.style.height = "200px";
+            boardDiv.style.width = "200px";
+            boardDiv.style.border = "dotted";
+            boardDiv.style.position = "relative";
+            // boardDiv.style.alignContent = "middle";
+            boardDiv.style.textAlign = "center";
+            boardDiv.style.justifyContent = "center";
+            boardDiv.style.marginLeft = "1";
+            boardDiv.style.cssFloat = "left";
+            // boardDiv.innerText = "Code: " + userId;
+            boardDiv.appendChild(x);
+            boardDiv.appendChild(br);
+            boardDiv.appendChild(span);
+
+            return boardDiv;
+        }
+
+        function createAndModifyDivs(count, name, userId, address, mobile) {
+            var board = document.getElementById("board"),
+                i = 0;
+            myDivs = [];
+            myDivs.push(createDiv(name, userId, address, mobile));
+            board.appendChild(myDivs[i]);
+        }
+
+        function closeQRCode() {
+            $("#board").empty();
+            $("#printBtn").hide();
+            $("#closeBtn").hide();
+        }
+
+        function readTable() {
+            $("#board").empty();
+            $("#printBtn").focus();
+            $("#printBtn").show();
+            $("#closeBtn").show();
+
+            var ary = [];
+            var count = 3;
+            $('table tr').each(function (row, tr) {
+                var row = $(this);
+                if (count > 3) {
+                    if (row.find('input[type="checkbox"]').is(':checked')) {
+                        var chk = $(tr).find('td:eq(0)').val()
+                        var name = $(tr).find('td:eq(2)').text()
+                        var userId = $(tr).find('td:eq(3)').text()
+                        var mobile = $(tr).find('td:eq(4)').text()
+                        var address = $(tr).find('td:eq(5)').text()
+
+                        if (name != "" || name != null || name != undefined) {
+                            createAndModifyDivs(count, name, userId, address, mobile);
+                        }
+                    }
+                }
+                count++;
+            });
+        }
+
+        function checkAll(class_name) {
+            $(".checkSingle").each(function () {
+                if (this.checked == true)
+                    this.checked = false;
+                else
+                    this.checked = true;
+            });
+        }
+
+        $('#checkedAll').change(function () {
+            $('.checkSingle').prop('checked', this.checked);
+        });
+
+        function printDiv(divName) {
+            // $("board").printElement();
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+        }
+
+        $(function () {
+            $("#closeBtn").hide();
+            $("#printBtn").hide();
+
+            $('#checkedAll').change(function () {
+                $('.checkSingle').prop('checked', this.checked);
+            });
+
+            window.onafterprint = function () {
+                window.location.reload(true);
+            }
+
+            $('#userTable').DataTable({
+                "scrollX": true
+                // ,"scrollY": 400,
+            });
+            $('.dataTables_length').addClass('bs-select');
+        });
+
+    </script>
+
+</head>
+<body>
+<div layout:fragment="content" th:remove="tag">
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                HCA List
+            </h1>
+        </section>
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <!-- /.box-header -->
+                        <!--<div class="card">-->
+                        <div class="card-body">
+                            <div class="card-title">
+
+                                <div class="box-body">
+                                    <div id="modal-1" class="printableArea">
+                                        <input type="button" onclick="readTable();" value="Generate QR Code"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="card-body">
+                            <div class="box-body">
+                                <label style="padding-left: 30%; color: red; align-content: center;" th:if="${error}"
+                                       th:text="${error}"/>
+                                <label style="padding-left: 30%; color: green; align-content: center;"
+                                       th:if="${success}"
+                                       th:text="${success}"/>
+
+                                <table id="userTable" class="table table-bordered table-hover table-condensed">
+                                    <thead>
+                                    <tr>
+                                        <!--<th style="width: 4%">Sl</th>-->
+                                        <th style="text-align: center;width: 3%">
+                                            <input type="checkbox" class="checkedAll" name="checkedAll"
+                                                   id="checkedAll"/>
+                                        </th>
+                                        <th style="width: 12%">Action</th>
+                                        <th style="width: 15%">Name</th>
+                                        <th style="width: 15%">HCA ID</th>
+                                        <th style="width: 10%">Mobile Number</th>
+                                        <th style="width: 23%">Address</th>
+                                        <th style="width: 6%">Role</th>
+                                        <th style="width: 6%">Status</th>
+                                        <th style="width: 8%">Created</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="user, iter : ${userlist}">
+                                        <!--<td th:text="${iter.count}"></td>-->
+                                        <td>
+                                            <input style="text-align: center;" type="checkbox" name="checkAll"
+                                                   id="'check'+${iter.count}" class="checkSingle"/>
+                                        </td>
+                                        <td style="max-width: 10%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%">
+                                            <a th:href="@{/adminpanel/user/useredit/{id}(id=${user.getId()})}"
+                                               title="Edit" class="btn btn-xs btn-success"> <i class="fa fa-pencil-square-o"></i></a>
+
+                                            <a th:href="@{/adminpanel/user/userdelete/{id}(id=${user.getId()})}"
+                                               title="Delete" class="btn btn-xs btn-danger"> <i class="fa fa-trash-o"></i> </a>
+
+                                            <span th:if="${user.isActive()}">
+                                            <a th:href="@{/adminpanel/user/deactivateUser/{id}(id=${user.getId()})}"
+                                               title="Deactive" class="btn btn-xs btn-warning"> <span class="glyphicon glyphicon-off"></span> </a>
+                                            </span>
+
+                                            <span th:unless="${user.isActive()}">
+                                                <a th:href="@{/adminpanel/user/activeUser/{id}(id=${user.getId()})}"
+                                                   title="Active" class="btn btn-xs btn-success"> <span class="glyphicon glyphicon-ok"></span> </a>
+                                            </span>
+                                        </td>
+
+                                        <td th:text="${user.getFullName(user)}"></td>
+                                        <td style="max-width: 12%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                                th:text="${user.getId()}"></td>
+                                        <td th:text="${user.getMobileNumber()}"></td>
+                                        <td th:text="${user.getAddress()}"></td>
+                                        <td th:text="${user.getAuthority()}"></td>
+                                        <td th:if="${user.isActive()}">Active</td>
+                                        <td th:unless="${user.isActive()}">Inactive</td>
+                                        <td style="max-width: 9%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                            th:text="${#dates.format(user.getCreated(), 'dd-MM-yyyy HH:mm:ss')}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">
+                                <div class="box-body">
+                                    <div id="modal-2" class="printableArea">
+                                        <input type="button" onclick="readTable();" value="Generate QR Code"/>
+                                        <input type="button" id="printBtn" class="printdiv-btnn"
+                                               onclick="printDiv('board');"
+                                               value="Print QR CODE!"/>
+                                        <input type="button" id="closeBtn" onclick="closeQRCode();" value="Close"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="container">
+                                <div id="board">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </section>
+</div>
+</div>
+</body>
+</html>

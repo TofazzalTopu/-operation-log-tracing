@@ -1,0 +1,153 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script th:src="@{/assets/js/pms/sales/salesList.js}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+
+    <style type="text/css">
+        #overlay {
+            background: #ffffff;
+            color: #666666;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: 5000;
+            top: 0;
+            left: 0;
+            float: left;
+            text-align: center;
+            padding-top: 25%;
+        }
+
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting:before,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_asc:before,
+        table.dataTable thead .sorting_asc_disabled:after,
+        table.dataTable thead .sorting_asc_disabled:before,
+        table.dataTable thead .sorting_desc:after,
+        table.dataTable thead .sorting_desc:before,
+        table.dataTable thead .sorting_desc_disabled:after,
+        table.dataTable thead .sorting_desc_disabled:before {
+            bottom: .5em;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('#logTable').DataTable({
+                dom : "'<'col-sm-4'l><'col-sm-4 text-center'><'col-sm-4'>Bfrtip",
+                buttons : [ 'copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5' ],
+                aaSorting: [ [0, 'desc'] ],
+                "scrollX": true,
+                "order": [
+                    [0, "desc"]
+                ]
+                // ,"scrollY": 400,
+            });
+            $('.dataTables_length').addClass('bs-select');
+            document.title = "OP Log List_"+ moment().format('DDMMYYYYHHMMSS');
+
+        });
+    </script>
+
+</head>
+<body>
+<div layout:fragment="content" th:remove="tag">
+    <div class="content-wrapper">
+        <div id="overlay">
+            <img th:src="@{/assets/img/loader.gif}" width="100px"> Loading...
+        </div>
+        <section class="content-header">
+            <div class="row">
+                <div class="col-xs-6">Home > User > <strong>OP Log List </strong></div>
+            </div>
+
+            <p style="text-align: center">Date Range Query: <input id="pmsDateRangePicker" readonly="readonly"></p>
+            <br/>
+
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        <div class="box-body table-responsive">
+                            <table id="logTable" class="table table-striped table-bordered table-hover table-sm"
+                                   cellspacing="0" width="100%">
+                                <caption class="info">List of Session Log Info</caption>
+                                <thead>
+                                <tr>
+                                    <th hidden style="max-width: 4%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        ID
+                                    </th>
+                                    <th style="max-width: 15%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        HCA Name
+                                    </th>
+                                    <!--<th style="max-width: 10%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        Mobile
+                                    </th>-->
+                                    <th style="max-width: 15%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        SU Name
+                                    </th>
+                                    <th style="max-width: 8%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        Start Location
+                                    </th>
+                                    <th style="max-width: 8%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        End Location
+                                    </th>
+                                    <th style="max-width: 7%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        Start Time
+                                    </th>
+                                    <th style="max-width: 7%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        End Time
+                                    </th>
+                                    <th style="max-width: 6%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        Duration
+                                    </th>
+                                    <th style="max-width: 15%; word-break:break-all; padding-left: 0%; padding-right: 0%">
+                                        Comment
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="s, iter : ${workSessionWiseLogList}">
+                                    <td hidden style="max-width: 4%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getId()}"></td>
+                                    <td style="max-width: 15%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getFirstName() +' '+ s.getLastName()}"></td>
+                                    <!--<td style="max-width: 9%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getMobileNumber()}"></td>-->
+                                    <td style="max-width: 15%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getCustomerId()}"></td>
+                                    <td style="max-width: 8%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getStartPostCode()}"></td>
+                                    <td style="max-width: 8%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getEndPostCode()}"></td>
+                                    <td style="max-width: 7%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${#temporals.format(s.getStartTime(), 'dd-MM-yyyy HH:mm')}"></td>
+                                    <td style="max-width: 7%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${#temporals.format(s.getEndTime(), 'dd-MM-yyyy HH:mm')}"></td>
+                                    <td style="max-width: 6%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getDuration()}"></td>
+                                    <td style="max-width: 15%; word-break:break-all; padding-left: 0.5%; padding-right: 0.5%"
+                                        th:text="${s.getClosingComment()}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+
+</html>

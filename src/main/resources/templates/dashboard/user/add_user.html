@@ -1,0 +1,181 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        $(function () {
+
+            $('#password').val("");
+
+            $('#postCode').keyup(function() {
+                var yourInput = $(this).val();
+                re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+                var isSplChar = re.test(yourInput);
+                if(isSplChar){
+                    var no_spl_char = yourInput.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+                    $(this).val(no_spl_char);
+                }
+            });
+        })
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content" th:remove="tag">
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1 style="text-align:center">
+                Add HCA
+            </h1>
+        </section>
+
+        <section class="content">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="box box-primary">
+                        <form id="app" role="form" th:action="@{/adminpanel/user/usersave}" th:object="${user}"
+                              method="post">
+                            <div class="box-body">
+                                <!--<label style="padding-left: 20%; color: red; align-content: center;" th:if="${message}"
+                                       th:text="${message}"/>-->
+                                <label style="padding-left: 30%; color: red; align-content: center;" th:if="${error}"
+                                       th:text="${error}"/>
+                                <label style="padding-left: 30%; color: green; align-content: center;" th:if="${success}"
+                                       th:text="${success}"/>
+
+                                <div class="form-group">
+                                    <label for="firstName">Email</label>:
+                                    <input required type="email" th:field="*{id}" id="id" class="form-control is-valid"
+                                           autofocus="autofocus" placeholder="Enter Email">
+                                    <label th:if="${#fields.hasErrors('id')}" th:errors="*{id}"
+                                           th:class="'error text-danger'"> Email </label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>:
+                                    <input required type="text" th:field="*{firstName}" minlength="2" maxlength="50"
+                                           id="firstName" class="form-control" autofocus="autofocus"
+                                           placeholder="First Name (Length 2 to 50)">
+                                    <label th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"
+                                           th:class="'error text-danger'">First Name</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>:
+                                    <input required type="text" th:field="*{lastName}" maxlength="50" id="lastName"
+                                           class="form-control" autofocus="autofocus"
+                                           placeholder="Last Name (Max length 50)">
+                                    <label th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"
+                                           th:class="'error'">Last Name</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="image">Image</label>
+                                    <input @change="imgUpload" type="file" id="image"
+                                           class="form-control form-control-file">
+                                    <input type="hidden" v-model="photo" th:field="*{photo}" name="photo">
+                                </div>
+
+                                <div class="image-preview" style="overflow:hidden; position: relative;"
+                                     v-if="imageData.length > 0">
+                                    <div style="position:relative; overflow:hidden">
+                                        <img class="preview" :src="imageData"
+                                             style="width:100px;height:100px;background-color:white; border: 1px solid #DDD; padding: 5px;">
+                                        <a @click.prevent="removeImg" href="#"
+                                           style="position: absolute;left:50px;top:50px;transform: translate(-50%)"><i
+                                                class="fa fa-times"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>:
+                                    <input required type="password" th:field="*{password}" minlength="8" maxlength="20"
+                                           id="password"  name="password" class="form-control" autofocus="autofocus"
+                                           placeholder="Password (Length 8 to 20)">
+                                    <label th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                                           th:class="'error'">Password</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mobileNumber">Mobile</label>:
+                                    <input required type="number" th:field="*{mobileNumber}" minlength="11" maxlength="14"
+                                           id="mobileNumber" class="form-control is-valid" autofocus="autofocus"
+                                           placeholder="Mobile (Length 11 to 14)">
+                                    <label th:if="${#fields.hasErrors('mobileNumber')}" th:errors="*{mobileNumber}"
+                                           th:class="'error'">Mobile</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Post Code</label>:
+                                    <input required type="text" th:field="*{postCode}" minlength="2" maxlength="10"
+                                           id="postCode" class="form-control" autofocus="autofocus"
+                                           placeholder="Post Code (Length 2 to 10)">
+                                    <label th:if="${#fields.hasErrors('postCode')}" th:errors="*{postCode}"
+                                           th:class="'error'">Post Code</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Address</label>:
+                                    <input required type="text" th:field="*{address}" minlength="10" maxlength="200"
+                                           id="address" class="form-control" autofocus="autofocus"
+                                           placeholder="Address (Length 10 to 200)">
+                                    <label th:if="${#fields.hasErrors('address')}" th:errors="*{address}"
+                                           th:class="'error'">Address</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Select Role</label>:
+                                    <ul>
+                                        <li th:each="role : ${rolelist}">
+                                            <div class="ui checkbox">
+                                                <input type="checkbox" th:field="*{selectedRole}"
+                                                       th:value="${role.getId()}">
+                                                <label th:text="${role.name}"></label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div class="box-footer">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                        <script>
+                            new Vue({
+                                el: '#app',
+                                data: {
+                                    photo: "",
+                                    imageData: "",
+                                },
+                                methods: {
+                                    imgUpload: function (event) {
+                                        var input = event.target;
+                                        this.featuredImageFlag = true;
+
+                                        if (input.files && input.files[0]) {
+                                            var reader = new FileReader();
+                                            reader.onload = (e) => {
+                                                this.imageData = e.target.result;
+                                                this.photo = e.target.result;
+                                            }
+                                            reader.readAsDataURL(input.files[0]);
+                                        }
+                                    },
+                                    removeImg: function () {
+                                        this.imageData = "";
+                                    }
+                                }
+                            })
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!-- /.row -->
+        </section>
+        <!-- /.content -->
+    </div>
+</div>
+</body>
+</html>
